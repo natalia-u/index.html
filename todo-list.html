@@ -5,7 +5,7 @@
     <meta charset='UTF-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>TODO ліст</title>
+    <title>ToDo List</title>
     <style>
         * {
             padding: 0;
@@ -14,6 +14,13 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .title {
+            margin: 5px 10px;
+            display: flex;
+            text-transform: uppercase;
+            margin-left: 200px;
         }
 
         .task-list {
@@ -26,10 +33,12 @@
 
         .task {
             display: flex;
+            overflow: auto;
             align-items: center;
-            border: 1px solid gray;
-            padding: 3px 8px;
-            margin: 2px 10px;
+            border: 1px solid lightslategray;
+            border-radius: 15px;
+            padding: 4px 8px;
+            margin: 5px 10px;
         }
 
         .task p {
@@ -37,7 +46,7 @@
         }
 
         .completed {
-            background-color: green;
+            background-color: rgb(255, 168, 63);
             color: white;
         }
 
@@ -60,11 +69,30 @@
             padding-left: 4px;
             width: 94.5%;
             margin-bottom: 5px;
+            border-radius: 14px;
+            border: 1px solid lightslategray;
+
+        }
+
+        button {
+            margin: 5px;
+            padding: 15px;
+            min-height: 30px;
+            min-width: 120px;
+            border-radius: 10px;
+            background-color: rgb(205, 241, 205);
+            border: none;
+        }
+
+        button:hover {
+            background-color: rgb(108, 199, 108);
+            transition: 0.7s;
         }
     </style>
 </head>
 
 <body>
+    <div class="title">to do list</div>
     <div class='input-panel'>
         <input type='text' id='task-name-input'>
         <button id='add-task-btn'>Додати завдання</button>
@@ -76,8 +104,8 @@
     </div>
 
     <script>
-        class Task{
-            constructor(task, isFinished){
+        class Task {
+            constructor(task, isFinished) {
                 this.task = task;
                 this.isFinished = isFinished;
             }
@@ -146,11 +174,12 @@
             let unfinishedTaks = tasks.filter(t => !t.isFinished);
 
             tasks.filter(t => t.isFinished).forEach(t => {
-                document.querySelector(`[data-task=${t.task}]`).remove();
+                document.querySelector(`[data-task="${t.task}"]`).remove();
             });
 
             tasks = unfinishedTaks;
             saveTasks();
+            startMessage.hidden = !!unfinishedTaks.length;
         }
 
         function addTask(task, isFinished) {
@@ -164,18 +193,18 @@
             changeTaskState(newTask, isFinished);
         }
 
-        function loadTasks(){
+        function loadTasks() {
             let savedTasks = window.localStorage.getItem('tasks');
-            
-            if(!savedTasks) return;
+
+            if (!savedTasks) return;
 
             let tasks = JSON.parse(savedTasks);
 
-            for(let t of tasks) 
+            for (let t of tasks)
                 addTask(t.task, t.isFinished);
         }
 
-        function saveTasks(){
+        function saveTasks() {
             window.localStorage.setItem('tasks', JSON.stringify(tasks));
         }
     </script>
