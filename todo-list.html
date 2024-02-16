@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>TODO ліст</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .task-list {
+            width: 500px;
+        }
+
+        #start-message {
+            margin: 10px;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            border: 1px solid gray;
+            padding: 3px 8px;
+            margin: 2px 10px;
+        }
+
+        .task p {
+            margin-left: 4px;
+        }
+
+        .completed {
+            background-color: green;
+            color: white;
+        }
+
+        .completed p {
+            text-decoration: line-through;
+        }
+
+        .input-panel {
+            width: 500px;
+            margin: 8px;
+            padding: 2px;
+        }
+
+        .input-panel button {
+            padding: 4px;
+        }
+
+        .input-panel input {
+            height: 23px;
+            padding-left: 4px;
+            width: 94.5%;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='input-panel'>
+        <input type='text' id='task-name-input'>
+        <button id='add-task-btn'>Додати завдання</button>
+        <button id='remove-comleted-btn'>Видалити завершені</button>
+    </div>
+
+    <div class='task-list'>
+        <p id='start-message'>Немає нових завдань</p>
+    </div>
+
+    <script>
+        class Task{
+            constructor(task, isFinished){
+                this.task = task;
+                this.isFinished = isFinished;
+            }
+        }
+    </script>
+
+    <script>
+        let taskNameInput = document.querySelector('#task-name-input');
+        let addTaskButton = document.querySelector('#add-task-btn');
+        let startMessage = document.querySelector('#start-message');
+        let taskList = document.querySelector('.task-list');
+        let tasks = [];
+
+        loadTasks();
+
+        addTaskButton.addEventListener('click', addTaskHandler);
+        taskList.addEventListener('click', taskCheckboxHandler);
+        document.querySelector('#remove-comleted-btn').addEventListener('click', removeCompletedTaksHandler);
+
+        function createTask(task, isFinished) {
+            let div = document.createElement('div');
+            div.classList.add('task');
+            div.setAttribute('data-task', task);
+
+            let input = document.createElement('input');
+            input.type = 'checkbox';
+            input.checked = isFinished;
+
+            let p = document.createElement('p');
+            p.innerText = task;
+
+            div.append(input);
+            div.append(p);
+
+            return div;
+        }
+
+        function taskCheckboxHandler(e) {
+            if (e.target.nodeName != 'input' && e.target.type != 'checkbox') {
+                return;
+            }
+
+            changeTaskState(e.target.parentElement, e.target.checked);
+        }
+
+        function changeTaskState(taskDiv, isFinished) {
+            if (isFinished) {
+                taskDiv.classList.add('completed');
+            } else {
+                taskDiv.classList.remove('completed');
+            }
+
+            tasks.filter(t => t.task == taskDiv.getAttribute('data-task'))[0].isFinished = isFinished;
+            saveTasks();
+        }
+
+        function addTaskHandler() {
+            if (taskNameInput.value) {
+                addTask(taskNameInput.value);
+                taskNameInput.value = '';
+                saveTasks();
+            }
+        }
+
+        function removeCompletedTaksHandler() {
+            let unfinishedTaks = tasks.filter(t => !t.isFinished);
+
+            tasks.filter(t => t.isFinished).forEach(t => {
+                document.querySelector(`[data-task=${t.task}]`).remove();
+            });
+
+            tasks = unfinishedTaks;
+            saveTasks();
+        }
+
+        function addTask(task, isFinished) {
+            if (!startMessage.hidden) startMessage.hidden = true;
+
+            let newTask = createTask(task, isFinished);
+            taskList.append(newTask);
+
+            tasks.push(new Task(task, !!isFinished));
+
+            changeTaskState(newTask, isFinished);
+        }
+
+        function loadTasks(){
+            let savedTasks = window.localStorage.getItem('tasks');
+            
+            if(!savedTasks) return;
+
+            let tasks = JSON.parse(savedTasks);
+
+            for(let t of tasks) 
+                addTask(t.task, t.isFinished);
+        }
+
+        function saveTasks(){
+            window.localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+    </script>
+</body>
+
+</html>
